@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+
+cd -P -- "$(dirname -- "$0")"
+exec ./claude_mock eval 'ClaudeMock.Release.seed_conversations()'

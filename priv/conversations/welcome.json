@@ -1,0 +1,26 @@
+{
+  "title": "Bienvenida a Claude Mock",
+  "model": "claude-opus-4-6",
+  "messages": [
+    {
+      "position": 0,
+      "role": "user",
+      "content": "¿Qué es esta aplicación?"
+    },
+    {
+      "position": 1,
+      "role": "assistant",
+      "content": "Claude Mock es un visor **solo lectura** para conversaciones archivadas con Claude.\n\nSoporta Markdown, bloques de código con resaltado de sintaxis, tablas y listas — todo con la misma estética que usas en claude.ai.\n\n### Ejemplo de código\n\n```elixir\ndefmodule Hola do\n  def mundo do\n    IO.puts(\"¡Hola, mundo!\")\n  end\nend\n```\n\n### Ejemplo de lista\n\n- Sidebar con lista de conversaciones\n- Render de Markdown con `earmark`\n- Resaltado via `highlight.js`\n- Tema oscuro tipo Claude"
+    },
+    {
+      "position": 2,
+      "role": "user",
+      "content": "¿Puedo escribir mensajes aquí?"
+    },
+    {
+      "position": 3,
+      "role": "assistant",
+      "content": "No, este visor es **solo lectura**. Los mensajes se cargan desde la base de datos — seedeados desde archivos JSON o añadidos más adelante desde un panel de administración."
+    }
+  ]
+}

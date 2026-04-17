@@ -1,0 +1,83 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+/* =========================================================
+   Global dark theme - app forces `dark` class on <html>
+   ========================================================= */
+html, body {
+  background-color: #262624;
+  color: #f4f3ee;
+}
+
+body {
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Thin, muted scrollbar */
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: #3d3d3a; border-radius: 6px; }
+*::-webkit-scrollbar-thumb:hover { background: #54524c; }
+
+/* =========================================================
+   Markdown content styling — applied on .markdown-body
+   ========================================================= */
+.markdown-body {
+  @apply text-claude-text leading-7 text-[15px];
+}
+.markdown-body > * + * { margin-top: 1em; }
+.markdown-body h1 { @apply text-2xl font-semibold mt-6 mb-3; }
+.markdown-body h2 { @apply text-xl  font-semibold mt-6 mb-3; }
+.markdown-body h3 { @apply text-lg  font-semibold mt-5 mb-2; }
+.markdown-body h4 { @apply text-base font-semibold mt-4 mb-2; }
+.markdown-body p  { @apply leading-7; }
+.markdown-body a  { @apply text-claude-accent underline underline-offset-2 hover:text-claude-accenthover; }
+.markdown-body strong { @apply font-semibold text-claude-text; }
+.markdown-body em { @apply italic; }
+.markdown-body ul { @apply list-disc pl-6 space-y-1; }
+.markdown-body ol { @apply list-decimal pl-6 space-y-1; }
+.markdown-body li { @apply leading-7; }
+.markdown-body blockquote {
+  @apply border-l-2 border-claude-border pl-4 text-claude-textmuted italic;
+}
+.markdown-body hr { @apply border-claude-border my-6; }
+.markdown-body table {
+  @apply w-full border-collapse text-sm my-3;
+}
+.markdown-body th, .markdown-body td {
+  @apply border border-claude-border px-3 py-2 text-left align-top;
+}
+.markdown-body th { @apply bg-claude-panel font-semibold; }
+
+/* Inline code */
+.markdown-body :not(pre) > code {
+  @apply bg-claude-panel text-claude-text rounded px-1.5 py-0.5 text-[0.875em] font-mono;
+}
+
+/* Code blocks — outer wrapper when we want chrome, fallback for plain pre */
+.markdown-body pre {
+  @apply bg-[#1a1a18] border border-claude-border rounded-lg overflow-x-auto p-4 text-[13.5px] leading-6 font-mono my-3;
+}
+.markdown-body pre code {
+  @apply bg-transparent p-0 text-inherit font-mono;
+}
+
+/* =========================================================
+   highlight.js — minimal dark theme matching Claude palette
+   ========================================================= */
+.hljs { background: transparent; color: #f4f3ee; }
+.hljs-comment, .hljs-quote { color: #827f76; font-style: italic; }
+.hljs-keyword, .hljs-selector-tag, .hljs-literal { color: #e88a69; }
+.hljs-string, .hljs-attr { color: #a5c47a; }
+.hljs-number, .hljs-built_in, .hljs-type { color: #d4b35a; }
+.hljs-title, .hljs-section, .hljs-function, .hljs-name { color: #80a7d1; }
+.hljs-variable, .hljs-template-variable { color: #e0c28c; }
+.hljs-tag { color: #c96442; }
+.hljs-symbol, .hljs-bullet { color: #cbb87d; }
+.hljs-meta { color: #827f76; }
+.hljs-deletion { color: #e07070; }
+.hljs-addition { color: #a5c47a; }
+.hljs-emphasis { font-style: italic; }
+.hljs-strong { font-weight: 700; }
