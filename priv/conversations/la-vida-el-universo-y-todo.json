@@ -1,0 +1,16 @@
+{
+  "title": "La vida, el universo y todo lo demás",
+  "model": "claude-opus-4-6",
+  "messages": [
+    {
+      "position": 0,
+      "role": "user",
+      "content": "¿Cuál es la respuesta a la vida, el universo y todo lo demás?"
+    },
+    {
+      "position": 1,
+      "role": "assistant",
+      "content": "**42.**"
+    }
+  ]
+}

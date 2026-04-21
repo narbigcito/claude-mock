@@ -17,6 +17,10 @@ defmodule ClaudeMockWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :embed do
+    plug :accepts, ["html"]
+  end
+
   scope "/", ClaudeMockWeb do
     pipe_through :browser
 
@@ -25,6 +29,12 @@ defmodule ClaudeMockWeb.Router do
       live "/", ChatLive, :index
       live "/c/:id", ChatLive, :show
     end
+  end
+
+  scope "/embed", ClaudeMockWeb do
+    pipe_through :embed
+
+    get "/:id", EmbedController, :show
   end
 
   # Other scopes may use custom stacks.
