@@ -38,3 +38,6 @@ npm-debug.log
 # Local secrets + Docker env
 .env
 
+# Project memory file (contains sensitive data)
+AGENTS.md
+

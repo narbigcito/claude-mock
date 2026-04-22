@@ -2,34 +2,96 @@ name: Deploy to Production
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+
+concurrency:
+  group: production
+  cancel-in-progress: true
 
 jobs:
   deploy:
+    name: Deploy to Production Server
     runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
 
-    - name: Deploy to server via SSH
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.SSH_HOST }}
-        username: ${{ secrets.SSH_USER }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        script: |
-          echo "=== Starting deployment ==="
-          cd /srv/claude-mock
-          
-          echo "=== Pulling latest changes ==="
-          git pull origin main
-          
-          echo "=== Rebuilding and restarting containers ==="
-          docker compose up -d --build
-          
-          echo "=== Cleaning up old images ==="
-          docker image prune -f
-          
-          echo "=== Deployment complete ==="
-          docker compose ps
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+          log-public-key: false
+
+      - name: Install cloudflared
+        run: |
+          curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb -o cloudflared.deb
+          sudo dpkg -i cloudflared.deb
+
+      - name: Configure SSH for Cloudflare
+        run: |
+          mkdir -p ~/.ssh
+          cat >> ~/.ssh/config << 'EOF'
+          Host ssh.narbigcito.com
+            ProxyCommand cloudflared access ssh --hostname %h
+            StrictHostKeyChecking no
+            UserKnownHostsFile /dev/null
+          EOF
+          chmod 600 ~/.ssh/config
+
+      - name: Deploy to production
+        env:
+          SSH_HOST: ssh.narbigcito.com
+          SSH_USER: ${{ secrets.SSH_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          CLOUDFLARED_SERVICE_TOKEN_ID: ${{ secrets.CLOUDFLARE_SERVICE_TOKEN_ID }}
+          CLOUDFLARED_SERVICE_TOKEN_SECRET: ${{ secrets.CLOUDFLARE_SERVICE_TOKEN_SECRET }}
+        run: |
+          echo "🚀 Deploying to production server..."
+
+          ssh $SSH_USER@ssh.narbigcito.com << EOF
+            set -e
+
+            echo "📁 Navigating to project directory..."
+            cd $DEPLOY_PATH
+
+            echo "⬇️ Pulling latest changes..."
+            git fetch origin main
+            git reset --hard origin/main
+
+            echo "🐳 Deploying with Docker Compose..."
+            docker compose -f docker-compose.prod.yml down || true
+            docker compose -f docker-compose.prod.yml up -d --build
+
+            echo "🧹 Cleaning up old Docker images..."
+            docker image prune -f
+
+            echo "✅ Deployment complete!"
+            echo ""
+            echo "📊 Checking container status..."
+            docker ps | grep claude-mock || echo "⚠️ Warning: Container may not be running"
+          EOF
+
+          echo "🎉 Deployment finished successfully!"
+
+      - name: Verify deployment
+        env:
+          SSH_HOST: ssh.narbigcito.com
+          SSH_USER: ${{ secrets.SSH_USER }}
+          CLOUDFLARED_SERVICE_TOKEN_ID: ${{ secrets.CLOUDFLARE_SERVICE_TOKEN_ID }}
+          CLOUDFLARED_SERVICE_TOKEN_SECRET: ${{ secrets.CLOUDFLARE_SERVICE_TOKEN_SECRET }}
+        run: |
+          echo "🔍 Verifying deployment..."
+          sleep 5
+
+          # Check if service is responding
+          if ssh $SSH_USER@ssh.narbigcito.com "docker ps | grep -q claude-mock"; then
+            echo "✅ Container is running"
+          else
+            echo "❌ Container is not running"
+            exit 1
+          fi
+
+          echo ""
+          echo "🌐 Application deployed at: https://claude-mock.narbigcito.com"
