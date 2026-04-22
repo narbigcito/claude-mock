@@ -28,28 +28,36 @@ body {
   @apply text-claude-text leading-7 text-[15px];
 }
 .markdown-body > * + * { margin-top: 1em; }
-.markdown-body h1 { @apply text-2xl font-semibold mt-6 mb-3; }
-.markdown-body h2 { @apply text-xl  font-semibold mt-6 mb-3; }
-.markdown-body h3 { @apply text-lg  font-semibold mt-5 mb-2; }
-.markdown-body h4 { @apply text-base font-semibold mt-4 mb-2; }
+.markdown-body h1 { @apply text-xl sm:text-2xl font-semibold mt-6 mb-3; }
+.markdown-body h2 { @apply text-lg sm:text-xl  font-semibold mt-6 mb-3; }
+.markdown-body h3 { @apply text-base sm:text-lg  font-semibold mt-5 mb-2; }
+.markdown-body h4 { @apply text-sm sm:text-base font-semibold mt-4 mb-2; }
 .markdown-body p  { @apply leading-7; }
 .markdown-body a  { @apply text-claude-accent underline underline-offset-2 hover:text-claude-accenthover; }
 .markdown-body strong { @apply font-semibold text-claude-text; }
 .markdown-body em { @apply italic; }
-.markdown-body ul { @apply list-disc pl-6 space-y-1; }
-.markdown-body ol { @apply list-decimal pl-6 space-y-1; }
+.markdown-body ul { @apply list-disc pl-4 sm:pl-6 space-y-1; }
+.markdown-body ol { @apply list-decimal pl-4 sm:pl-6 space-y-1; }
 .markdown-body li { @apply leading-7; }
 .markdown-body blockquote {
-  @apply border-l-2 border-claude-border pl-4 text-claude-textmuted italic;
+  @apply border-l-2 border-claude-border pl-3 sm:pl-4 text-claude-textmuted italic;
 }
 .markdown-body hr { @apply border-claude-border my-6; }
 .markdown-body table {
   @apply w-full border-collapse text-sm my-3;
 }
 .markdown-body th, .markdown-body td {
-  @apply border border-claude-border px-3 py-2 text-left align-top;
+  @apply border border-claude-border px-2 sm:px-3 py-2 text-left align-top;
 }
 .markdown-body th { @apply bg-claude-panel font-semibold; }
+
+/* Responsive tables wrapper */
+.markdown-body table {
+  display: block;
+  overflow-x: auto;
+  white-space: nowrap;
+  max-width: 100%;
+}
 
 /* Inline code */
 .markdown-body :not(pre) > code {
@@ -58,10 +66,13 @@ body {
 
 /* Code blocks — outer wrapper when we want chrome, fallback for plain pre */
 .markdown-body pre {
-  @apply bg-[#1a1a18] border border-claude-border rounded-lg overflow-x-auto p-4 text-[13.5px] leading-6 font-mono my-3;
+  @apply bg-[#1a1a18] border border-claude-border rounded-lg overflow-x-auto p-3 sm:p-4 text-[12px] sm:text-[13.5px] leading-6 font-mono my-3;
+  max-width: 100%;
 }
 .markdown-body pre code {
   @apply bg-transparent p-0 text-inherit font-mono;
+  word-wrap: normal;
+  white-space: pre;
 }
 
 /* =========================================================

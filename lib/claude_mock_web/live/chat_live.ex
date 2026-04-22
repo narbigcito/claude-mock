@@ -11,6 +11,7 @@ defmodule ClaudeMockWeb.ChatLive do
      |> assign(:conversations, Chats.list_conversations())
      |> assign(:conversation, nil)
      |> assign(:show_export, false)
+     |> assign(:show_sidebar, false)
      |> assign(:base_url, ClaudeMockWeb.Endpoint.url())
      |> assign(:page_title, "Claude")}
   end
@@ -53,21 +54,52 @@ defmodule ClaudeMockWeb.ChatLive do
   end
 
   @impl true
+  def handle_event("toggle_sidebar", _params, socket) do
+    {:noreply, assign(socket, :show_sidebar, !socket.assigns.show_sidebar)}
+  end
+
+  @impl true
+  def handle_event("close_sidebar", _params, socket) do
+    {:noreply, assign(socket, :show_sidebar, false)}
+  end
+
+  @impl true
   def render(assigns) do
     ~H"""
     <div class="flex h-screen w-screen overflow-hidden bg-claude-bg text-claude-text">
+      <%# Mobile sidebar overlay %>
+      <div
+        :if={@show_sidebar}
+        class="fixed inset-0 z-40 bg-black/50 lg:hidden"
+        phx-click="close_sidebar"
+      />
+
       <ChatComponents.sidebar
         conversations={@conversations}
         selected_id={@conversation && @conversation.id}
         current_user={assigns[:current_user]}
+        show_sidebar={@show_sidebar}
+        on_close={"close_sidebar"}
       />
 
       <main class="flex min-w-0 flex-1 flex-col">
-        <header class="flex h-14 items-center border-b border-claude-border px-6 gap-3">
-          <h1 class="truncate text-[15px] font-medium text-claude-text flex-1">
+        <header class="flex h-14 items-center border-b border-claude-border px-4 lg:px-6 gap-3">
+          <%# Mobile menu button %>
+          <button
+            phx-click="toggle_sidebar"
+            class="lg:hidden flex h-8 w-8 items-center justify-center rounded-lg text-claude-textmuted hover:bg-claude-hover hover:text-claude-text"
+            aria-label="Abrir menú"
+          >
+            <.icon name="hero-bars-3" class="h-5 w-5" />
+          </button>
+
+          <h1 class="truncate text-[15px] font-medium text-claude-text flex-1 min-w-0">
             {(@conversation && @conversation.title) || "Claude Mock"}
           </h1>
-          <span :if={@conversation && @conversation.model} class="rounded-full border border-claude-border px-2 py-0.5 text-[11px] text-claude-textmuted shrink-0">
+          <span
+            :if={@conversation && @conversation.model}
+            class="hidden sm:inline-flex rounded-full border border-claude-border px-2 py-0.5 text-[11px] text-claude-textmuted shrink-0"
+          >
             {@conversation.model}
           </span>
           <button
@@ -77,7 +109,7 @@ defmodule ClaudeMockWeb.ChatLive do
             class="flex items-center gap-1.5 rounded-lg border border-claude-border px-3 py-1.5 text-xs text-claude-textmuted hover:bg-claude-hover hover:text-claude-text transition-colors shrink-0"
           >
             <.icon name="hero-arrow-down-tray" class="h-3.5 w-3.5" />
-            Exportar
+            <span class="hidden sm:inline">Exportar</span>
           </button>
         </header>
 
@@ -87,7 +119,7 @@ defmodule ClaudeMockWeb.ChatLive do
             phx-hook="Highlight"
             class="flex-1 overflow-y-auto"
           >
-            <div class="mx-auto w-full max-w-3xl space-y-6 px-4 py-8">
+            <div class="mx-auto w-full max-w-3xl space-y-4 sm:space-y-6 px-3 sm:px-4 py-4 sm:py-8">
               <ChatComponents.message :for={m <- @conversation.messages} message={m} />
             </div>
           </div>

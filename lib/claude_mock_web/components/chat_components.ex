@@ -13,15 +13,30 @@ defmodule ClaudeMockWeb.ChatComponents do
   attr :conversations, :list, required: true
   attr :selected_id, :any, default: nil
   attr :current_user, :any, default: nil
+  attr :show_sidebar, :boolean, default: false
+  attr :on_close, :string, default: "close_sidebar"
 
   def sidebar(assigns) do
     ~H"""
-    <aside class="flex h-screen w-64 shrink-0 flex-col border-r border-claude-border bg-claude-sidebar">
+    <aside
+      class={[
+        "fixed lg:static inset-y-0 left-0 z-50 flex h-screen w-64 shrink-0 flex-col border-r border-claude-border bg-claude-sidebar transition-transform duration-300 ease-in-out lg:translate-x-0",
+        if(@show_sidebar, do: "translate-x-0", else: "-translate-x-full")
+      ]}
+    >
       <div class="flex items-center gap-2 px-4 pt-4 pb-3">
         <div class="flex h-7 w-7 items-center justify-center rounded-md bg-claude-accent text-white">
           <.icon name="hero-sparkles-solid" class="h-4 w-4" />
         </div>
-        <span class="font-serif text-[17px] text-claude-text">Claude</span>
+        <span class="font-serif text-[17px] text-claude-text flex-1">Claude</span>
+        <%# Close button for mobile %>
+        <button
+          phx-click={@on_close}
+          class="lg:hidden flex h-7 w-7 items-center justify-center rounded-md text-claude-textmuted hover:bg-claude-hover hover:text-claude-text"
+          aria-label="Cerrar menú"
+        >
+          <.icon name="hero-x-mark" class="h-5 w-5" />
+        </button>
       </div>
 
       <div class="px-3 pb-3">
@@ -103,16 +118,16 @@ defmodule ClaudeMockWeb.ChatComponents do
   def message(%{message: %{role: "user"}} = assigns) do
     ~H"""
     <div class="flex justify-end">
-      <div class="w-fit max-w-[75%] rounded-2xl bg-claude-panel px-4 py-2.5 text-[15px] leading-7 text-claude-text whitespace-pre-wrap"><%= @message.content %></div>
+      <div class="w-fit max-w-[85%] sm:max-w-[75%] rounded-2xl bg-claude-panel px-3 sm:px-4 py-2.5 text-[15px] leading-7 text-claude-text whitespace-pre-wrap"><%= @message.content %></div>
     </div>
     """
   end
 
   def message(%{message: %{role: "assistant"}} = assigns) do
     ~H"""
-    <div class="flex gap-4">
-      <div class="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-claude-accent text-white">
-        <.icon name="hero-sparkles-solid" class="h-4 w-4" />
+    <div class="flex gap-2 sm:gap-4">
+      <div class="mt-1 flex h-6 w-6 sm:h-7 sm:w-7 shrink-0 items-center justify-center rounded-full bg-claude-accent text-white">
+        <.icon name="hero-sparkles-solid" class="h-3.5 w-3.5 sm:h-4 sm:w-4" />
       </div>
       <div class="min-w-0 flex-1 markdown-body">
         {Phoenix.HTML.raw(Markdown.to_html(@message.content))}
@@ -136,7 +151,7 @@ defmodule ClaudeMockWeb.ChatComponents do
   """
   def composer_placeholder(assigns) do
     ~H"""
-    <div class="mx-auto w-full max-w-3xl px-4 pb-6">
+    <div class="mx-auto w-full max-w-3xl px-3 sm:px-4 pb-4 sm:pb-6">
       <div
         aria-disabled="true"
         class="flex flex-col gap-2 rounded-2xl border border-claude-border bg-claude-panel/90 p-3 shadow-sm"
