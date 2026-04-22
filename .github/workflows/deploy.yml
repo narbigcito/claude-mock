@@ -1,0 +1,35 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Deploy to server via SSH
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          echo "=== Starting deployment ==="
+          cd /srv/claude-mock
+          
+          echo "=== Pulling latest changes ==="
+          git pull origin main
+          
+          echo "=== Rebuilding and restarting containers ==="
+          docker compose up -d --build
+          
+          echo "=== Cleaning up old images ==="
+          docker image prune -f
+          
+          echo "=== Deployment complete ==="
+          docker compose ps
