@@ -176,7 +176,7 @@ defmodule ClaudeMockWeb.AdminLive.AdminUsersLive do
                   required
                   class="mt-1 w-full rounded border border-claude-border bg-claude-bg px-3 py-2 text-sm text-claude-text"
                 />
-                <.error :for={error <- @form[:email].errors}>{error}</.error>
+
               </div>
 
               <div>
@@ -188,7 +188,7 @@ defmodule ClaudeMockWeb.AdminLive.AdminUsersLive do
                   required
                   class="mt-1 w-full rounded border border-claude-border bg-claude-bg px-3 py-2 text-sm text-claude-text"
                 />
-                <.error :for={error <- @form[:password].errors}>{error}</.error>
+
                 <p class="mt-1 text-xs text-claude-textmuted">
                   Mínimo 12 caracteres
                 </p>
@@ -276,7 +276,7 @@ defmodule ClaudeMockWeb.AdminLive.AdminUsersLive do
                       required
                       class="mt-1 w-full rounded border border-claude-border bg-claude-bg px-3 py-2 text-sm text-claude-text"
                     />
-                    <.error :for={error <- @password_form[:password].errors}>{error}</.error>
+
                     <p class="mt-1 text-xs text-claude-textmuted">
                       Mínimo 12 caracteres
                     </p>
@@ -291,7 +291,7 @@ defmodule ClaudeMockWeb.AdminLive.AdminUsersLive do
                       required
                       class="mt-1 w-full rounded border border-claude-border bg-claude-bg px-3 py-2 text-sm text-claude-text"
                     />
-                    <.error :for={error <- @password_form[:password_confirmation].errors}>{error}</.error>
+
                   </div>
 
                   <div class="flex gap-3 pt-2">
