@@ -109,6 +109,41 @@ defmodule ClaudeMock.Accounts do
   end
 
   @doc """
+  Deletes a user.
+
+  ## Examples
+
+      iex> delete_user(user)
+      {:ok, %User{}}
+
+      iex> delete_user(user)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_user(%User{} = user) do
+    Repo.delete(user)
+  end
+
+  @doc """
+  Updates an admin user's password directly (no current password required).
+  Intended for admin use only.
+
+  ## Examples
+
+      iex> update_admin_password(user, %{password: "new password"})
+      {:ok, %User{}}
+
+      iex> update_admin_password(user, %{password: "short"})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_admin_password(%User{} = user, attrs) do
+    user
+    |> User.password_changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
   Returns an `%Ecto.Changeset{}` for tracking user changes.
 
   ## Examples

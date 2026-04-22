@@ -5,6 +5,7 @@ defmodule ClaudeMock.Accounts.User do
   schema "users" do
     field :email, :string
     field :password, :string, virtual: true, redact: true
+    field :password_confirmation, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :current_password, :string, virtual: true, redact: true
     field :confirmed_at, :utc_datetime
@@ -118,7 +119,7 @@ defmodule ClaudeMock.Accounts.User do
   """
   def password_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:password])
+    |> cast(attrs, [:password, :password_confirmation])
     |> validate_confirmation(:password, message: "does not match password")
     |> validate_password(opts)
   end
