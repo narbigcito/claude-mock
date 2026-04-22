@@ -44,6 +44,12 @@ defmodule ClaudeMockWeb.AdminLive.DashboardLive do
           <h1 class="text-[15px] font-medium">Administración</h1>
           <div class="flex items-center gap-2">
             <.link
+              navigate={~p"/admin/users"}
+              class="flex items-center gap-2 rounded-lg border border-claude-border px-3 py-1.5 text-sm font-medium text-claude-text hover:bg-claude-hover"
+            >
+              <.icon name="hero-users" class="h-4 w-4" /> Gestionar admins
+            </.link>
+            <.link
               navigate={~p"/admin/from-image"}
               class="flex items-center gap-2 rounded-lg border border-claude-border px-3 py-1.5 text-sm font-medium text-claude-text hover:bg-claude-hover"
             >

@@ -37,6 +37,12 @@ defmodule ClaudeMockWeb.Router do
     get "/:id", EmbedController, :show
   end
 
+  scope "/export", ClaudeMockWeb do
+    pipe_through :embed
+
+    get "/:id", EmbedController, :export
+  end
+
   # Other scopes may use custom stacks.
   # scope "/api", ClaudeMockWeb do
   #   pipe_through :api
@@ -94,6 +100,7 @@ defmodule ClaudeMockWeb.Router do
       live "/new", ConversationNewLive, :new
       live "/from-image", ConversationFromImageLive, :new
       live "/:id/edit", ConversationEditLive, :edit
+      live "/users", AdminUsersLive, :index
     end
   end
 

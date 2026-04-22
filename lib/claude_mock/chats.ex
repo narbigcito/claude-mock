@@ -16,6 +16,9 @@ defmodule ClaudeMock.Chats do
     Conversation
     |> order_by([c], desc: c.updated_at)
     |> Repo.all()
+    |> Enum.sort_by(fn c ->
+      if c.title == "Bienvenida a Claude Mock", do: 0, else: 1
+    end)
   end
 
   @doc "Returns conversations plus their message count, newest first."

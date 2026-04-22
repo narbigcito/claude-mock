@@ -21,6 +21,22 @@ defmodule ClaudeMockWeb.EmbedController do
     end
   end
 
+  def export(conn, %{"id" => id}) do
+    case Ecto.UUID.cast(id) do
+      {:ok, uuid} ->
+        conversation = Chats.get_conversation!(uuid)
+        filename = String.replace(conversation.title, ~r/[^\w\s-]/, "") <> ".html"
+
+        conn
+        |> put_resp_header("content-disposition", ~s(attachment; filename="#{filename}"))
+        |> put_view(ClaudeMockWeb.EmbedHTML)
+        |> render(:export, conversation: conversation)
+
+      :error ->
+        send_resp(conn, 404, "not found")
+    end
+  end
+
   defp allow_iframe(conn, _opts) do
     conn
     |> delete_resp_header("x-frame-options")

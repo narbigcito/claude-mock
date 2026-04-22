@@ -60,10 +60,24 @@ defmodule ClaudeMock.Release do
   Bootstraps an admin account. Run once after the first deploy:
 
       bin/claude_mock eval 'ClaudeMock.Release.create_admin("admin@example.com", "super-secret-123")'
+
+  Or using the migrate script (which doesn't start the web server):
+
+      bin/migrate eval 'ClaudeMock.Release.create_admin("admin@example.com", "super-secret-123")'
   """
   def create_admin(email, password) when is_binary(email) and is_binary(password) do
     load_app()
-    {:ok, _} = Application.ensure_all_started(@app)
+
+    # Start only required applications, not the full web server
+    {:ok, _} = Application.ensure_all_started(:crypto)
+    {:ok, _} = Application.ensure_all_started(:ssl)
+    {:ok, _} = Application.ensure_all_started(:postgrex)
+    {:ok, _} = Application.ensure_all_started(:ecto_sql)
+
+    # Start repos manually
+    for repo <- repos() do
+      {:ok, _} = repo.start_link(pool_size: 2)
+    end
 
     case ClaudeMock.Accounts.register_admin(%{email: email, password: password}) do
       {:ok, user} ->

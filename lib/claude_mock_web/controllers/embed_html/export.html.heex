@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{@conversation.title}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/atelier-forest.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body {
+        background: #262624;
+        color: #f4f3ee;
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        font-size: 16px;
+        margin: 0;
+        padding: 0;
+        -webkit-font-smoothing: antialiased;
+      }
+      .container {
+        max-width: 48rem;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+      /* User bubble */
+      .msg-user { display: flex; justify-content: flex-end; }
+      .msg-user-bubble {
+        background: #30302e;
+        border-radius: 1rem;
+        padding: 0.625rem 1rem;
+        font-size: 0.9375rem;
+        line-height: 1.75rem;
+        max-width: 75%;
+        white-space: pre-wrap;
+        word-break: break-word;
+        color: #f4f3ee;
+      }
+      /* Assistant */
+      .msg-assistant { display: flex; gap: 1rem; align-items: flex-start; }
+      .msg-icon {
+        margin-top: 0.15rem;
+        width: 1.75rem;
+        height: 1.75rem;
+        border-radius: 50%;
+        background: #c96442;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: white;
+        font-size: 0.65rem;
+        font-weight: bold;
+      }
+      .msg-body {
+        flex: 1;
+        min-width: 0;
+        font-size: 0.9375rem;
+        line-height: 1.75rem;
+        color: #f4f3ee;
+      }
+      /* Markdown */
+      .msg-body p { margin: 0 0 0.875rem; }
+      .msg-body p:last-child { margin-bottom: 0; }
+      .msg-body h1, .msg-body h2, .msg-body h3, .msg-body h4 { margin: 1.5rem 0 0.5rem; font-weight: 600; line-height: 1.25; }
+      .msg-body h1 { font-size: 1.5rem; }
+      .msg-body h2 { font-size: 1.25rem; }
+      .msg-body h3 { font-size: 1.125rem; }
+      .msg-body h4 { font-size: 1rem; }
+      .msg-body ul, .msg-body ol { padding-left: 1.5rem; margin: 0.5rem 0; }
+      .msg-body li { margin: 0.25rem 0; }
+      .msg-body code {
+        background: #30302e;
+        border-radius: 0.25rem;
+        padding: 0.1rem 0.375rem;
+        font-size: 0.875em;
+        font-family: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Monaco, Consolas, monospace;
+        color: #f4f3ee;
+      }
+      .msg-body pre {
+        background: #1f1e1d;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        overflow-x: auto;
+        margin: 0.75rem 0;
+      }
+      .msg-body pre code { background: none; padding: 0; font-size: 0.875rem; }
+      .msg-body a { color: #c96442; text-decoration: underline; }
+      .msg-body a:hover { color: #b5583a; }
+      .msg-body blockquote {
+        border-left: 3px solid #3d3d3a;
+        padding-left: 1rem;
+        margin: 0.75rem 0;
+        color: #b4b2a7;
+      }
+      .msg-body table { border-collapse: collapse; width: 100%; margin: 0.75rem 0; font-size: 0.875rem; }
+      .msg-body th, .msg-body td { border: 1px solid #3d3d3a; padding: 0.5rem 0.75rem; text-align: left; }
+      .msg-body th { background: #30302e; font-weight: 600; }
+      .msg-body img { max-width: 100%; border-radius: 0.5rem; }
+      .msg-body hr { border: none; border-top: 1px solid #3d3d3a; margin: 1.5rem 0; }
+      /* Title header */
+      .conv-header {
+        border-bottom: 1px solid #3d3d3a;
+        padding-bottom: 1rem;
+        margin-bottom: 0.5rem;
+      }
+      .conv-title { font-size: 1.125rem; font-weight: 600; color: #f4f3ee; margin: 0 0 0.25rem; }
+      .conv-model { font-size: 0.75rem; color: #827f76; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="conv-header">
+        <h2 class="conv-title">{@conversation.title}</h2>
+        <span :if={@conversation.model} class="conv-model">{@conversation.model}</span>
+      </div>
+
+      <%= for m <- @conversation.messages do %>
+        <%= if m.role == "user" do %>
+          <div class="msg-user">
+            <div class="msg-user-bubble"><%= m.content %></div>
+          </div>
+        <% else %>
+          <div class="msg-assistant">
+            <div class="msg-icon">✦</div>
+            <div class="msg-body">
+              {Phoenix.HTML.raw(ClaudeMockWeb.Markdown.to_html(m.content))}
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+    <script>
+      document.querySelectorAll('pre code').forEach((el) => window.hljs && window.hljs.highlightElement(el));
+    </script>
+  </body>
+</html>

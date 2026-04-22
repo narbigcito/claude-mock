@@ -10,6 +10,8 @@ defmodule ClaudeMockWeb.ChatLive do
      socket
      |> assign(:conversations, Chats.list_conversations())
      |> assign(:conversation, nil)
+     |> assign(:show_export, false)
+     |> assign(:base_url, ClaudeMockWeb.Endpoint.url())
      |> assign(:page_title, "Claude")}
   end
 
@@ -22,6 +24,7 @@ defmodule ClaudeMockWeb.ChatLive do
         {:noreply,
          socket
          |> assign(:conversation, conversation)
+         |> assign(:show_export, false)
          |> assign(:page_title, conversation.title)}
 
       :error ->
@@ -30,7 +33,23 @@ defmodule ClaudeMockWeb.ChatLive do
   end
 
   def handle_params(_params, _url, socket) do
-    {:noreply, assign(socket, :conversation, nil)}
+    welcome =
+      Enum.find(socket.assigns.conversations, fn c ->
+        c.title == "Bienvenida a Claude Mock"
+      end)
+
+    case welcome || List.first(socket.assigns.conversations) do
+      nil ->
+        {:noreply, assign(socket, :conversation, nil)}
+
+      conv ->
+        {:noreply, push_patch(socket, to: ~p"/c/#{conv.id}")}
+    end
+  end
+
+  @impl true
+  def handle_event("toggle_export", _params, socket) do
+    {:noreply, assign(socket, :show_export, !socket.assigns.show_export)}
   end
 
   @impl true
@@ -44,13 +63,22 @@ defmodule ClaudeMockWeb.ChatLive do
       />
 
       <main class="flex min-w-0 flex-1 flex-col">
-        <header class="flex h-14 items-center border-b border-claude-border px-6">
-          <h1 class="truncate text-[15px] font-medium text-claude-text">
+        <header class="flex h-14 items-center border-b border-claude-border px-6 gap-3">
+          <h1 class="truncate text-[15px] font-medium text-claude-text flex-1">
             {(@conversation && @conversation.title) || "Claude Mock"}
           </h1>
-          <span :if={@conversation && @conversation.model} class="ml-3 rounded-full border border-claude-border px-2 py-0.5 text-[11px] text-claude-textmuted">
+          <span :if={@conversation && @conversation.model} class="rounded-full border border-claude-border px-2 py-0.5 text-[11px] text-claude-textmuted shrink-0">
             {@conversation.model}
           </span>
+          <button
+            :if={@conversation}
+            phx-click="toggle_export"
+            title="Exportar conversación"
+            class="flex items-center gap-1.5 rounded-lg border border-claude-border px-3 py-1.5 text-xs text-claude-textmuted hover:bg-claude-hover hover:text-claude-text transition-colors shrink-0"
+          >
+            <.icon name="hero-arrow-down-tray" class="h-3.5 w-3.5" />
+            Exportar
+          </button>
         </header>
 
         <%= if @conversation do %>
@@ -79,6 +107,63 @@ defmodule ClaudeMockWeb.ChatLive do
 
         <ChatComponents.composer_placeholder />
       </main>
+
+      <%# Export modal %>
+      <div
+        :if={@show_export && @conversation}
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4"
+        phx-click="toggle_export"
+      >
+        <div
+          class="w-full max-w-lg rounded-2xl border border-claude-border bg-claude-panel shadow-2xl p-6"
+          phx-click-away="toggle_export"
+        >
+          <div class="flex items-center justify-between mb-5">
+            <h3 class="text-base font-semibold text-claude-text">Exportar conversación</h3>
+            <button phx-click="toggle_export" class="text-claude-textmuted hover:text-claude-text">
+              <.icon name="hero-x-mark" class="h-5 w-5" />
+            </button>
+          </div>
+
+          <div class="space-y-4">
+            <%# Iframe embed code %>
+            <div>
+              <p class="text-xs font-medium text-claude-textmuted mb-1.5">Código iframe para insertar en otras páginas:</p>
+              <div class="relative">
+                <textarea
+                  id="iframe-code"
+                  readonly
+                  rows="3"
+                  onclick="this.select()"
+                  class="w-full resize-none rounded-lg bg-claude-bg border border-claude-border px-3 py-2 text-xs font-mono text-claude-textmuted focus:outline-none focus:border-claude-accent"
+                ><%= "<iframe src=\"#{@base_url}/embed/#{@conversation.id}\" width=\"100%\" height=\"600\" frameborder=\"0\" style=\"border-radius:12px;overflow:hidden;\"></iframe>" %></textarea>
+              </div>
+              <button
+                onclick="navigator.clipboard.writeText(document.getElementById('iframe-code').value).then(() => { this.textContent = '¡Copiado!'; setTimeout(() => this.textContent = 'Copiar código', 2000) })"
+                class="mt-2 text-xs text-claude-accent hover:text-claude-accenthover transition-colors"
+              >
+                Copiar código
+              </button>
+            </div>
+
+            <%# Download standalone HTML %>
+            <div class="border-t border-claude-border pt-4">
+              <p class="text-xs font-medium text-claude-textmuted mb-2">Descargar como HTML independiente:</p>
+              <a
+                href={~p"/export/#{@conversation.id}"}
+                download={"#{@conversation.title}.html"}
+                class="inline-flex items-center gap-2 rounded-lg bg-claude-accent px-4 py-2 text-sm text-white hover:bg-[#b5583a] transition-colors"
+              >
+                <.icon name="hero-arrow-down-tray" class="h-4 w-4" />
+                Descargar HTML
+              </a>
+              <p class="mt-2 text-[11px] text-claude-textfaint">
+                El archivo HTML descargado incluye todo el CSS necesario y puede hospedarse en cualquier servidor para usarlo como iframe.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     """
   end
