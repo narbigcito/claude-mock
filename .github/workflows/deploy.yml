@@ -2,12 +2,12 @@ name: Deploy to Production
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - 'v*'
 
 concurrency:
   group: production
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   deploy:
@@ -17,6 +17,17 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify tag is reachable from main
+        run: |
+          git fetch origin main --depth=0
+          if ! git merge-base --is-ancestor "${GITHUB_SHA}" origin/main; then
+            echo "❌ Tag ${GITHUB_REF_NAME} is not on the main branch. Aborting deploy."
+            exit 1
+          fi
+          echo "✅ Tag ${GITHUB_REF_NAME} verified on main."
 
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.9.0
@@ -47,8 +58,9 @@ jobs:
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
           CLOUDFLARED_SERVICE_TOKEN_ID: ${{ secrets.CLOUDFLARE_SERVICE_TOKEN_ID }}
           CLOUDFLARED_SERVICE_TOKEN_SECRET: ${{ secrets.CLOUDFLARE_SERVICE_TOKEN_SECRET }}
+          RELEASE_TAG: ${{ github.ref_name }}
         run: |
-          echo "🚀 Deploying to production server..."
+          echo "🚀 Deploying tag ${RELEASE_TAG} to production..."
 
           ssh $SSH_USER@ssh.narbigcito.com << EOF
             set -e
@@ -56,9 +68,9 @@ jobs:
             echo "📁 Navigating to project directory..."
             cd $DEPLOY_PATH
 
-            echo "⬇️ Pulling latest changes..."
-            git fetch origin main
-            git reset --hard origin/main
+            echo "⬇️  Fetching tag ${RELEASE_TAG}..."
+            git fetch origin --tags --force
+            git checkout --force "${RELEASE_TAG}"
 
             echo "🐳 Deploying with Docker Compose..."
             docker compose -f docker-compose.prod.yml down || true
@@ -73,7 +85,7 @@ jobs:
             docker ps | grep claude-mock || echo "⚠️ Warning: Container may not be running"
           EOF
 
-          echo "🎉 Deployment finished successfully!"
+          echo "🎉 Deployment of ${RELEASE_TAG} finished successfully!"
 
       - name: Verify deployment
         env:
@@ -85,7 +97,6 @@ jobs:
           echo "🔍 Verifying deployment..."
           sleep 5
 
-          # Check if service is responding
           if ssh $SSH_USER@ssh.narbigcito.com "docker ps | grep -q claude-mock"; then
             echo "✅ Container is running"
           else
@@ -95,3 +106,4 @@ jobs:
 
           echo ""
           echo "🌐 Application deployed at: https://claude-mock.narbigcito.com"
+          echo "🏷️  Released version: ${{ github.ref_name }}"

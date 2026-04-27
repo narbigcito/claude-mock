@@ -1,6 +1,27 @@
 # CI/CD - GitHub Actions
 
-Este proyecto usa GitHub Actions para deploy automático a producción cada vez que se hace push a la rama `main`.
+Este proyecto tiene dos workflows:
+
+| Workflow | Cuándo corre | Qué hace |
+|----------|--------------|----------|
+| `ci.yml` | Push a `main` y cada Pull Request hacia `main` | Lint (`mix format --check-formatted`), compila con `--warnings-as-errors`, y corre la suite de tests con un servicio Postgres |
+| `deploy.yml` | Cuando se crea un **tag** que empieza con `v` (ej: `v1.0.0`) | Verifica que el tag esté en `main`, conecta al servidor vía Cloudflare Tunnel, hace `git checkout` al tag y reconstruye los contenedores |
+
+## 🚢 Cómo hacer un release
+
+```bash
+# 1. Asegúrate de estar en main y actualizado
+git checkout main
+git pull
+
+# 2. Crea un tag siguiendo SemVer
+git tag -a v1.0.0 -m "Release v1.0.0"
+
+# 3. Empuja el tag — esto dispara el deploy
+git push origin v1.0.0
+```
+
+> El deploy se aborta si el tag no es alcanzable desde `main` (`git merge-base --is-ancestor`). Eso evita publicar código que vive solo en una rama de feature.
 
 ## ⚙️ Configuración
 
@@ -99,15 +120,16 @@ sudo usermod -aG docker $USER
 # Cerrar sesión y volver a entrar para aplicar cambios
 ```
 
-## 🚀 Cómo funciona
+## 🚀 Cómo funciona el deploy
 
-Cada vez que haces push a `main`:
+Cuando empujas un tag `v*`:
 
-1. GitHub Actions se conecta al servidor vía Cloudflare Tunnel
-2. Hace `git reset --hard origin/main` para asegurar el código exacto
-3. Ejecuta `docker compose -f docker-compose.prod.yml up -d --build`
-4. Limpia imágenes antiguas de Docker
-5. Verifica que el contenedor está corriendo
+1. GitHub Actions verifica que el commit del tag exista en `main`
+2. Se conecta al servidor vía Cloudflare Tunnel
+3. Ejecuta `git fetch --tags --force` y `git checkout` al tag exacto
+4. Ejecuta `docker compose -f docker-compose.prod.yml up -d --build`
+5. Limpia imágenes antiguas de Docker
+6. Verifica que el contenedor está corriendo
 
 La aplicación usa Traefik (ya corriendo en el servidor) para:
 - SSL automático con Let's Encrypt
@@ -169,9 +191,9 @@ docker ps | grep traefik
 
 ## 📝 Notas
 
-- El workflow usa **concurrency** para evitar deploys simultáneos
-- Si un deploy está en progreso y llega otro push, el anterior se cancela
-- Siempre se hace `git reset --hard` para asegurar que el servidor tenga exactamente lo mismo que main
+- El workflow de deploy usa **concurrency** (`cancel-in-progress: false`): si llegan dos tags casi simultáneos se ejecutan en orden, no se cancelan entre sí
+- El workflow de CI sí cancela ejecuciones anteriores del mismo branch/PR cuando llega un commit nuevo
+- El deploy hace `git checkout` al tag exacto, así el servidor siempre corre una versión nombrada (no un commit suelto)
 - Las imágenes antiguas de Docker se limpian automáticamente después del deploy
 - La base de datos persiste en un volumen Docker llamado `db_data`
 - Las conversaciones se leen desde `./priv/conversations` (montado como volumen read-only)
