@@ -60,8 +60,7 @@ defmodule ClaudeMockWeb.AdminLive.ConversationFromImageLive do
         {:noreply, assign(socket, error: msg)}
 
       {:insert, {:error, changeset}} ->
-        {:noreply,
-         assign(socket, error: "No se pudo guardar: #{inspect(changeset.errors)}")}
+        {:noreply, assign(socket, error: "No se pudo guardar: #{inspect(changeset.errors)}")}
     end
   end
 
@@ -97,10 +96,17 @@ defmodule ClaudeMockWeb.AdminLive.ConversationFromImageLive do
 
   defp validate_shape(payload) do
     cond do
-      not is_map(payload) -> {:error, "El JSON debe ser un objeto."}
-      not is_binary(payload["title"]) or payload["title"] == "" -> {:error, "Falta el campo `title`."}
-      not is_list(payload["messages"]) -> {:error, "El campo `messages` debe ser una lista."}
-      true -> :ok
+      not is_map(payload) ->
+        {:error, "El JSON debe ser un objeto."}
+
+      not is_binary(payload["title"]) or payload["title"] == "" ->
+        {:error, "Falta el campo `title`."}
+
+      not is_list(payload["messages"]) ->
+        {:error, "El campo `messages` debe ser una lista."}
+
+      true ->
+        :ok
     end
   end
 
@@ -149,7 +155,10 @@ defmodule ClaudeMockWeb.AdminLive.ConversationFromImageLive do
               <.live_file_input upload={@uploads.screenshot} class="sr-only" />
             </label>
 
-            <div :for={entry <- @uploads.screenshot.entries} class="flex items-center gap-3 rounded-lg border border-claude-border bg-claude-panel/60 px-3 py-2 text-sm">
+            <div
+              :for={entry <- @uploads.screenshot.entries}
+              class="flex items-center gap-3 rounded-lg border border-claude-border bg-claude-panel/60 px-3 py-2 text-sm"
+            >
               <.icon name="hero-document" class="h-4 w-4 text-claude-textmuted" />
               <span class="flex-1 truncate">{entry.client_name}</span>
               <span class="text-xs text-claude-textmuted">{entry.progress}%</span>
@@ -176,7 +185,7 @@ defmodule ClaudeMockWeb.AdminLive.ConversationFromImageLive do
                 disabled={@generating? or @uploads.screenshot.entries == []}
                 class="rounded-lg bg-claude-accent px-4 py-2 text-sm font-medium text-white hover:bg-claude-accenthover disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <%= if @generating?, do: "Generando…", else: "Generar JSON" %>
+                {if @generating?, do: "Generando…", else: "Generar JSON"}
               </button>
             </div>
           </form>
@@ -193,7 +202,10 @@ defmodule ClaudeMockWeb.AdminLive.ConversationFromImageLive do
               class="w-full rounded-lg border border-claude-border bg-[#1a1a18] px-3 py-2 font-mono text-[13px] leading-5 text-claude-text focus:border-claude-accent focus:outline-none focus:ring-0"
             ><%= @json_input %></textarea>
 
-            <div :if={@error} class="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+            <div
+              :if={@error}
+              class="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-300"
+            >
               {@error}
             </div>
 

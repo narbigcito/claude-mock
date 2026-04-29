@@ -25,7 +25,10 @@ defmodule ClaudeMockWeb.UserLoginLive do
 
           <:actions>
             <.input field={@form[:remember_me]} type="checkbox" label="Mantener sesión iniciada" />
-            <.link href={~p"/users/reset_password"} class="text-sm font-semibold text-claude-textmuted hover:text-claude-text">
+            <.link
+              href={~p"/users/reset_password"}
+              class="text-sm font-semibold text-claude-textmuted hover:text-claude-text"
+            >
               ¿Olvidaste tu contraseña?
             </.link>
           </:actions>

@@ -55,11 +55,13 @@ defmodule ClaudeMock.LLM do
     cfg = Application.get_env(:claude_mock, __MODULE__, [])
 
     case {cfg[:base_url], cfg[:api_key], cfg[:model]} do
-      {base, key, model} when is_binary(base) and is_binary(key) and key != "" and is_binary(model) ->
+      {base, key, model}
+      when is_binary(base) and is_binary(key) and key != "" and is_binary(model) ->
         {:ok, %{base_url: base, api_key: key, model: model}}
 
       _ ->
-        {:error, "LLM no configurado: define PANOPTIKON_API_KEY (y opcionalmente PANOPTIKON_BASE_URL / PANOPTIKON_MODEL)."}
+        {:error,
+         "LLM no configurado: define PANOPTIKON_API_KEY (y opcionalmente PANOPTIKON_BASE_URL / PANOPTIKON_MODEL)."}
     end
   end
 
@@ -94,14 +96,20 @@ defmodule ClaudeMock.LLM do
            json: body,
            receive_timeout: 120_000
          ) do
-      {:ok, %Req.Response{status: 200, body: body}} -> {:ok, body}
-      {:ok, %Req.Response{status: status, body: body}} -> {:error, "LLM HTTP #{status}: #{inspect(body)}"}
-      {:error, reason} -> {:error, "LLM request failed: #{inspect(reason)}"}
+      {:ok, %Req.Response{status: 200, body: body}} ->
+        {:ok, body}
+
+      {:ok, %Req.Response{status: status, body: body}} ->
+        {:error, "LLM HTTP #{status}: #{inspect(body)}"}
+
+      {:error, reason} ->
+        {:error, "LLM request failed: #{inspect(reason)}"}
     end
   end
 
-  defp extract_text(%{"choices" => [%{"message" => %{"content" => text}} | _]}) when is_binary(text),
-    do: {:ok, text}
+  defp extract_text(%{"choices" => [%{"message" => %{"content" => text}} | _]})
+       when is_binary(text),
+       do: {:ok, text}
 
   defp extract_text(other), do: {:error, "Respuesta inesperada del LLM: #{inspect(other)}"}
 
@@ -111,8 +119,11 @@ defmodule ClaudeMock.LLM do
     |> strip_fences()
     |> Jason.decode()
     |> case do
-      {:ok, map} -> {:ok, map}
-      {:error, %Jason.DecodeError{} = e} -> {:error, "El LLM no devolvió JSON válido: #{Exception.message(e)}"}
+      {:ok, map} ->
+        {:ok, map}
+
+      {:error, %Jason.DecodeError{} = e} ->
+        {:error, "El LLM no devolvió JSON válido: #{Exception.message(e)}"}
     end
   end
 

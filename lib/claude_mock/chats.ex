@@ -85,7 +85,10 @@ defmodule ClaudeMock.Chats do
       :conversation,
       Ecto.Changeset.change(conversation, %{title: title, model: model})
     )
-    |> Multi.delete_all(:messages, from(m in Message, where: m.conversation_id == ^conversation.id))
+    |> Multi.delete_all(
+      :messages,
+      from(m in Message, where: m.conversation_id == ^conversation.id)
+    )
     |> Multi.insert_all(
       :inserted,
       Message,

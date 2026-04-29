@@ -15,7 +15,7 @@ defmodule ClaudeMockWeb.Markdown do
   Converts a markdown string to safe HTML for rendering with `Phoenix.HTML.raw/1`.
   """
   def to_html(nil), do: ""
-  def to_html(""),  do: ""
+  def to_html(""), do: ""
 
   def to_html(markdown) when is_binary(markdown) do
     case Earmark.as_html(markdown, @earmark_options) do

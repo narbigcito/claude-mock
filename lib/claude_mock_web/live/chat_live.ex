@@ -67,7 +67,7 @@ defmodule ClaudeMockWeb.ChatLive do
   def render(assigns) do
     ~H"""
     <div class="flex h-screen w-screen overflow-hidden bg-claude-bg text-claude-text">
-      <%# Mobile sidebar overlay %>
+      
       <div
         :if={@show_sidebar}
         class="fixed inset-0 z-40 bg-black/50 lg:hidden"
@@ -79,12 +79,12 @@ defmodule ClaudeMockWeb.ChatLive do
         selected_id={@conversation && @conversation.id}
         current_user={assigns[:current_user]}
         show_sidebar={@show_sidebar}
-        on_close={"close_sidebar"}
+        on_close="close_sidebar"
       />
 
       <main class="flex min-w-0 flex-1 flex-col">
         <header class="flex h-14 items-center border-b border-claude-border px-4 lg:px-6 gap-3">
-          <%# Mobile menu button %>
+          
           <button
             phx-click="toggle_sidebar"
             class="lg:hidden flex h-8 w-8 items-center justify-center rounded-lg text-claude-textmuted hover:bg-claude-hover hover:text-claude-text"
@@ -140,7 +140,6 @@ defmodule ClaudeMockWeb.ChatLive do
         <ChatComponents.composer_placeholder />
       </main>
 
-      <%# Export modal %>
       <div
         :if={@show_export && @conversation}
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4"
@@ -158,9 +157,11 @@ defmodule ClaudeMockWeb.ChatLive do
           </div>
 
           <div class="space-y-4">
-            <%# Iframe embed code %>
+            
             <div>
-              <p class="text-xs font-medium text-claude-textmuted mb-1.5">Código iframe para insertar en otras páginas:</p>
+              <p class="text-xs font-medium text-claude-textmuted mb-1.5">
+                Código iframe para insertar en otras páginas:
+              </p>
               <div class="relative">
                 <textarea
                   id="iframe-code"
@@ -178,16 +179,16 @@ defmodule ClaudeMockWeb.ChatLive do
               </button>
             </div>
 
-            <%# Download standalone HTML %>
             <div class="border-t border-claude-border pt-4">
-              <p class="text-xs font-medium text-claude-textmuted mb-2">Descargar como HTML independiente:</p>
+              <p class="text-xs font-medium text-claude-textmuted mb-2">
+                Descargar como HTML independiente:
+              </p>
               <a
                 href={~p"/export/#{@conversation.id}"}
                 download={"#{@conversation.title}.html"}
                 class="inline-flex items-center gap-2 rounded-lg bg-claude-accent px-4 py-2 text-sm text-white hover:bg-[#b5583a] transition-colors"
               >
-                <.icon name="hero-arrow-down-tray" class="h-4 w-4" />
-                Descargar HTML
+                <.icon name="hero-arrow-down-tray" class="h-4 w-4" /> Descargar HTML
               </a>
               <p class="mt-2 text-[11px] text-claude-textfaint">
                 El archivo HTML descargado incluye todo el CSS necesario y puede hospedarse en cualquier servidor para usarlo como iframe.

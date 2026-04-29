@@ -18,18 +18,15 @@ defmodule ClaudeMockWeb.ChatComponents do
 
   def sidebar(assigns) do
     ~H"""
-    <aside
-      class={[
-        "fixed lg:static inset-y-0 left-0 z-50 flex h-screen w-64 shrink-0 flex-col border-r border-claude-border bg-claude-sidebar transition-transform duration-300 ease-in-out lg:translate-x-0",
-        if(@show_sidebar, do: "translate-x-0", else: "-translate-x-full")
-      ]}
-    >
+    <aside class={[
+      "fixed lg:static inset-y-0 left-0 z-50 flex h-screen w-64 shrink-0 flex-col border-r border-claude-border bg-claude-sidebar transition-transform duration-300 ease-in-out lg:translate-x-0",
+      if(@show_sidebar, do: "translate-x-0", else: "-translate-x-full")
+    ]}>
       <div class="flex items-center gap-2 px-4 pt-4 pb-3">
         <div class="flex h-7 w-7 items-center justify-center rounded-md bg-claude-accent text-white">
           <.icon name="hero-sparkles-solid" class="h-4 w-4" />
         </div>
         <span class="font-serif text-[17px] text-claude-text flex-1">Claude</span>
-        <%# Close button for mobile %>
         <button
           phx-click={@on_close}
           class="lg:hidden flex h-7 w-7 items-center justify-center rounded-md text-claude-textmuted hover:bg-claude-hover hover:text-claude-text"
@@ -45,8 +42,7 @@ defmodule ClaudeMockWeb.ChatComponents do
             navigate={~p"/admin/new"}
             class="flex w-full items-center gap-2 rounded-lg border border-claude-border bg-claude-bg/40 px-3 py-2 text-sm text-claude-text hover:bg-claude-hover"
           >
-            <.icon name="hero-pencil-square" class="h-4 w-4" />
-            Nueva conversación
+            <.icon name="hero-pencil-square" class="h-4 w-4" /> Nueva conversación
           </.link>
         <% else %>
           <button
@@ -55,8 +51,7 @@ defmodule ClaudeMockWeb.ChatComponents do
             class="flex w-full items-center gap-2 rounded-lg border border-claude-border bg-claude-bg/40 px-3 py-2 text-sm text-claude-textmuted cursor-not-allowed"
             title="Modo solo lectura"
           >
-            <.icon name="hero-pencil-square" class="h-4 w-4" />
-            Nuevo chat
+            <.icon name="hero-pencil-square" class="h-4 w-4" /> Nuevo chat
           </button>
         <% end %>
       </div>
@@ -74,7 +69,8 @@ defmodule ClaudeMockWeb.ChatComponents do
                 "block truncate rounded-lg px-3 py-2 text-sm transition-colors",
                 if(@selected_id == c.id,
                   do: "bg-claude-panel text-claude-text",
-                  else: "text-claude-textmuted hover:bg-claude-hover hover:text-claude-text")
+                  else: "text-claude-textmuted hover:bg-claude-hover hover:text-claude-text"
+                )
               ]}
             >
               {c.title}
@@ -118,7 +114,9 @@ defmodule ClaudeMockWeb.ChatComponents do
   def message(%{message: %{role: "user"}} = assigns) do
     ~H"""
     <div class="flex justify-end">
-      <div class="w-fit max-w-[85%] sm:max-w-[75%] rounded-2xl bg-claude-panel px-3 sm:px-4 py-2.5 text-[15px] leading-7 text-claude-text whitespace-pre-wrap"><%= @message.content %></div>
+      <div class="w-fit max-w-[85%] sm:max-w-[75%] rounded-2xl bg-claude-panel px-3 sm:px-4 py-2.5 text-[15px] leading-7 text-claude-text whitespace-pre-wrap">
+        {@message.content}
+      </div>
     </div>
     """
   end
@@ -189,8 +187,7 @@ defmodule ClaudeMockWeb.ChatComponents do
 
           <div class="flex items-center gap-2">
             <span class="flex items-center gap-1 text-xs text-claude-textfaint">
-              <.icon name="hero-lock-closed-mini" class="h-3.5 w-3.5" />
-              Solo lectura
+              <.icon name="hero-lock-closed-mini" class="h-3.5 w-3.5" /> Solo lectura
             </span>
             <button
               type="button"
@@ -207,5 +204,4 @@ defmodule ClaudeMockWeb.ChatComponents do
     </div>
     """
   end
-
 end

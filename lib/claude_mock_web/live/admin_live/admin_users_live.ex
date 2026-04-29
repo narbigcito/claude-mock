@@ -176,7 +176,6 @@ defmodule ClaudeMockWeb.AdminLive.AdminUsersLive do
                   required
                   class="mt-1 w-full rounded border border-claude-border bg-claude-bg px-3 py-2 text-sm text-claude-text"
                 />
-
               </div>
 
               <div>
@@ -291,7 +290,6 @@ defmodule ClaudeMockWeb.AdminLive.AdminUsersLive do
                       required
                       class="mt-1 w-full rounded border border-claude-border bg-claude-bg px-3 py-2 text-sm text-claude-text"
                     />
-
                   </div>
 
                   <div class="flex gap-3 pt-2">

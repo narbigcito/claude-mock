@@ -47,17 +47,23 @@ defmodule ClaudeMockWeb.AdminLive.ConversationEditLive do
         {:noreply, assign(socket, error: msg)}
 
       {:update, {:error, changeset}} ->
-        {:noreply,
-         assign(socket, error: "No se pudo guardar: #{inspect(changeset.errors)}")}
+        {:noreply, assign(socket, error: "No se pudo guardar: #{inspect(changeset.errors)}")}
     end
   end
 
   defp validate_shape(payload) do
     cond do
-      not is_map(payload) -> {:error, "El JSON debe ser un objeto."}
-      not is_binary(payload["title"]) or payload["title"] == "" -> {:error, "Falta el campo `title`."}
-      not is_list(payload["messages"]) -> {:error, "El campo `messages` debe ser una lista."}
-      true -> :ok
+      not is_map(payload) ->
+        {:error, "El JSON debe ser un objeto."}
+
+      not is_binary(payload["title"]) or payload["title"] == "" ->
+        {:error, "Falta el campo `title`."}
+
+      not is_list(payload["messages"]) ->
+        {:error, "El campo `messages` debe ser una lista."}
+
+      true ->
+        :ok
     end
   end
 
@@ -94,7 +100,10 @@ defmodule ClaudeMockWeb.AdminLive.ConversationEditLive do
               class="w-full rounded-lg border border-claude-border bg-[#1a1a18] px-3 py-2 font-mono text-[13px] leading-5 text-claude-text focus:border-claude-accent focus:outline-none focus:ring-0"
             ><%= @json_input %></textarea>
 
-            <div :if={@error} class="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+            <div
+              :if={@error}
+              class="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-300"
+            >
               {@error}
             </div>
 

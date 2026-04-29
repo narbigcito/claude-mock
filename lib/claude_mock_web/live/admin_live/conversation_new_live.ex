@@ -93,10 +93,9 @@ defmodule ClaudeMockWeb.AdminLive.ConversationNewLive do
             <code class="rounded bg-claude-panel px-1 py-0.5 text-xs">title</code>
             y <code class="rounded bg-claude-panel px-1 py-0.5 text-xs">messages</code>
             (cada uno con <code class="rounded bg-claude-panel px-1 py-0.5 text-xs">role</code>
-            ∈ <code>user|assistant</code> y
-            <code class="rounded bg-claude-panel px-1 py-0.5 text-xs">content</code>).
-            <br />Opcional:
-            <code class="rounded bg-claude-panel px-1 py-0.5 text-xs">position</code>
+            ∈ <code>user|assistant</code>
+            y <code class="rounded bg-claude-panel px-1 py-0.5 text-xs">content</code>).
+            <br />Opcional: <code class="rounded bg-claude-panel px-1 py-0.5 text-xs">position</code>
             por mensaje — si lo incluyes, ese número fija el orden y ya no depende del array.
           </p>
 
@@ -108,7 +107,10 @@ defmodule ClaudeMockWeb.AdminLive.ConversationNewLive do
               class="w-full rounded-lg border border-claude-border bg-[#1a1a18] px-3 py-2 font-mono text-[13px] leading-5 text-claude-text focus:border-claude-accent focus:outline-none focus:ring-0"
             ><%= @json_input %></textarea>
 
-            <div :if={@error} class="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+            <div
+              :if={@error}
+              class="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-300"
+            >
               {@error}
             </div>
 
