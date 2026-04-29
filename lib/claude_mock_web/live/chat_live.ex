@@ -67,7 +67,6 @@ defmodule ClaudeMockWeb.ChatLive do
   def render(assigns) do
     ~H"""
     <div class="flex h-screen w-screen overflow-hidden bg-claude-bg text-claude-text">
-
       <div
         :if={@show_sidebar}
         class="fixed inset-0 z-40 bg-black/50 lg:hidden"
@@ -84,7 +83,6 @@ defmodule ClaudeMockWeb.ChatLive do
 
       <main class="flex min-w-0 flex-1 flex-col">
         <header class="flex h-14 items-center border-b border-claude-border px-4 lg:px-6 gap-3">
-
           <button
             phx-click="toggle_sidebar"
             class="lg:hidden flex h-8 w-8 items-center justify-center rounded-lg text-claude-textmuted hover:bg-claude-hover hover:text-claude-text"
@@ -157,7 +155,6 @@ defmodule ClaudeMockWeb.ChatLive do
           </div>
 
           <div class="space-y-4">
-
             <div>
               <p class="text-xs font-medium text-claude-textmuted mb-1.5">
                 Código iframe para insertar en otras páginas:
