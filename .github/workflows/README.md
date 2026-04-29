@@ -1,13 +1,32 @@
 # CI/CD - GitHub Actions
 
-Este proyecto tiene dos workflows:
+Este proyecto tiene tres workflows:
 
 | Workflow | Cuándo corre | Qué hace |
 |----------|--------------|----------|
-| `ci.yml` | Push a `main` y cada Pull Request hacia `main` | Lint (`mix format --check-formatted`), compila con `--warnings-as-errors`, y corre la suite de tests con un servicio Postgres |
-| `deploy.yml` | Cuando se crea un **tag** que empieza con `v` (ej: `v1.0.0`) | Verifica que el tag esté en `main`, conecta al servidor vía Cloudflare Tunnel, hace `git checkout` al tag y reconstruye los contenedores |
+| `ci.yml` | Push a `main` o `develop`, y cada Pull Request hacia ambas | Lint (`mix format --check-formatted`), compila con `--warnings-as-errors`, y corre la suite de tests con un servicio Postgres |
+| `deploy-sandbox.yml` | Push a `develop` | Conecta al servidor vía Cloudflare Tunnel, hace `git reset --hard origin/develop` y reconstruye los contenedores sandbox |
+| `deploy.yml` | Cuando se crea un **tag** que empieza con `v` (ej: `v1.0.0`) | Verifica que el tag esté en `main`, conecta al servidor vía Cloudflare Tunnel, hace `git checkout` al tag y reconstruye los contenedores de producción |
 
-## 🚢 Cómo hacer un release
+## 🔀 Flujo de trabajo
+
+```
+develop  →  merge  →  sandbox (auto)    https://claude-mock-sandbox.narbigcito.com
+main     →  tag v* →  producción (auto) https://claude-mock.narbigcito.com
+```
+
+## 🧪 Cómo deployar a sandbox
+
+Cualquier push a `develop` dispara el deploy automáticamente:
+
+```bash
+git checkout develop
+git merge mi-feature
+git push origin develop
+# → deploy automático a sandbox
+```
+
+## 🚢 Cómo hacer un release a producción
 
 ```bash
 # 1. Asegúrate de estar en main y actualizado
@@ -35,7 +54,8 @@ Agrega los siguientes secrets:
 |--------|-------------|---------|
 | `SSH_KEY` | Clave SSH privada (PEM format) | `-----BEGIN OPENSSH PRIVATE KEY-----...` |
 | `SSH_USER` | Usuario SSH del servidor | `narbigcito` |
-| `DEPLOY_PATH` | Ruta absoluta donde está el proyecto en el servidor | `/srv/claude-mock` |
+| `DEPLOY_PATH` | Ruta absoluta del proyecto en producción | `/srv/claude-mock` |
+| `SANDBOX_DEPLOY_PATH` | Ruta absoluta del proyecto en sandbox | `/srv/claude-mock-sandbox` |
 | `CLOUDFLARE_SERVICE_TOKEN_ID` | Token ID de Cloudflare Access | Desde el dashboard de Cloudflare |
 | `CLOUDFLARE_SERVICE_TOKEN_SECRET` | Token Secret de Cloudflare Access | Desde el dashboard de Cloudflare |
 

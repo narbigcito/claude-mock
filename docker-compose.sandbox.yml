@@ -1,0 +1,57 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: claude-mock-sandbox-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-claude_mock}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-claude_mock}
+      POSTGRES_DB: ${POSTGRES_DB:-claude_mock_sandbox}
+    volumes:
+      - db_data_sandbox:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-claude_mock} -d ${POSTGRES_DB:-claude_mock_sandbox}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - panoptikon-net
+
+  app:
+    build: .
+    container_name: claude-mock-sandbox
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: ecto://${POSTGRES_USER:-claude_mock}:${POSTGRES_PASSWORD:-claude_mock}@db/${POSTGRES_DB:-claude_mock_sandbox}
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+      PHX_HOST: ${PHX_HOST:-claude-mock-sandbox.narbigcito.com}
+      PHX_SERVER: "true"
+      PORT: "4005"
+      SEED_ON_BOOT: ${SEED_ON_BOOT:-true}
+      CONVERSATIONS_DIR: /data/conversations
+      PANOPTIKON_BASE_URL: ${PANOPTIKON_BASE_URL:-https://panoptikon.narbigcito.com/v1}
+      PANOPTIKON_API_KEY: ${PANOPTIKON_API_KEY}
+      PANOPTIKON_MODEL: ${PANOPTIKON_MODEL:-kimi-k2-turbo-preview}
+    volumes:
+      - ./priv/conversations:/data/conversations:ro
+    entrypoint: ["/app/entrypoint.sh"]
+    command: ["/app/bin/server"]
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.claude-mock-sandbox.rule=Host(`claude-mock-sandbox.narbigcito.com`)"
+      - "traefik.http.routers.claude-mock-sandbox.entrypoints=websecure"
+      - "traefik.http.routers.claude-mock-sandbox.tls.certresolver=letsencrypt"
+      - "traefik.http.services.claude-mock-sandbox.loadbalancer.server.port=4005"
+    networks:
+      - panoptikon-net
+
+volumes:
+  db_data_sandbox:
+
+networks:
+  panoptikon-net:
+    external: true
+    name: panoptikon_panoptikon-net

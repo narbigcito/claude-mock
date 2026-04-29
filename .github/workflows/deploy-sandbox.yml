@@ -1,0 +1,98 @@
+name: Deploy to Sandbox
+
+on:
+  push:
+    branches:
+      - develop
+
+concurrency:
+  group: sandbox
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to Sandbox Server
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          log-public-key: false
+
+      - name: Install cloudflared
+        run: |
+          curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb -o cloudflared.deb
+          sudo dpkg -i cloudflared.deb
+
+      - name: Configure SSH for Cloudflare
+        run: |
+          mkdir -p ~/.ssh
+          cat >> ~/.ssh/config << 'EOF'
+          Host ssh.narbigcito.com
+            ProxyCommand cloudflared access ssh --hostname %h
+            StrictHostKeyChecking no
+            UserKnownHostsFile /dev/null
+          EOF
+          chmod 600 ~/.ssh/config
+
+      - name: Deploy to sandbox
+        env:
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SANDBOX_DEPLOY_PATH: ${{ secrets.SANDBOX_DEPLOY_PATH }}
+          CLOUDFLARED_SERVICE_TOKEN_ID: ${{ secrets.CLOUDFLARE_SERVICE_TOKEN_ID }}
+          CLOUDFLARED_SERVICE_TOKEN_SECRET: ${{ secrets.CLOUDFLARE_SERVICE_TOKEN_SECRET }}
+          COMMIT_SHA: ${{ github.sha }}
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
+        run: |
+          echo "🚀 Deploying commit ${COMMIT_SHA::7} to sandbox..."
+
+          ssh $SSH_USER@ssh.narbigcito.com << EOF
+            set -e
+
+            echo "📁 Navigating to sandbox directory..."
+            cd $SANDBOX_DEPLOY_PATH
+
+            echo "⬇️  Pulling latest develop..."
+            git fetch origin develop
+            git checkout --force develop
+            git reset --hard origin/develop
+
+            echo "🐳 Deploying with Docker Compose..."
+            docker compose -f docker-compose.sandbox.yml down || true
+            docker compose -f docker-compose.sandbox.yml up -d --build
+
+            echo "🧹 Cleaning up old Docker images..."
+            docker image prune -f
+
+            echo "✅ Sandbox deployment complete!"
+            echo ""
+            echo "📊 Checking container status..."
+            docker ps | grep claude-mock-sandbox || echo "⚠️ Warning: Container may not be running"
+          EOF
+
+          echo "🎉 Sandbox deployment of ${COMMIT_SHA::7} finished!"
+
+      - name: Verify deployment
+        env:
+          SSH_USER: ${{ secrets.SSH_USER }}
+          CLOUDFLARED_SERVICE_TOKEN_ID: ${{ secrets.CLOUDFLARE_SERVICE_TOKEN_ID }}
+          CLOUDFLARED_SERVICE_TOKEN_SECRET: ${{ secrets.CLOUDFLARE_SERVICE_TOKEN_SECRET }}
+        run: |
+          echo "🔍 Verifying sandbox deployment..."
+          sleep 5
+
+          if ssh $SSH_USER@ssh.narbigcito.com "docker ps | grep -q claude-mock-sandbox"; then
+            echo "✅ Sandbox container is running"
+          else
+            echo "❌ Sandbox container is not running"
+            exit 1
+          fi
+
+          echo ""
+          echo "🌐 Sandbox available at: https://claude-mock-sandbox.narbigcito.com"
+          echo "🔀 Branch: develop @ ${{ github.sha }}"
