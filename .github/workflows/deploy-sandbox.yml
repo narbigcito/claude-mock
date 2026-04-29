@@ -62,6 +62,9 @@ jobs:
             git checkout --force develop
             git reset --hard origin/develop
 
+            echo "🐳 Ensuring Docker network exists..."
+            docker network create panoptikon_panoptikon-net 2>/dev/null || true
+
             echo "🐳 Deploying with Docker Compose..."
             docker compose -f docker-compose.sandbox.yml down || true
             docker compose -f docker-compose.sandbox.yml up -d --build
