@@ -47,14 +47,17 @@ make reset-db
 
 ## Test
 
+**⚠️ IMPORTANTE: Siempre corre los tests localmente antes de hacer push al CI.**
+
 ```bash
-# Single run (handles DB create/migrate automatically)
+# Primero asegúrate de tener la DB de test corriendo
+docker compose up -d db
+
+# Ejecutar todos los tests (recomendado antes de cada push)
 mix test
 
-# Single test file
+# Ejecutar tests específicos
 mix test test/claude_mock/accounts_test.exs
-
-# Single test by line
 mix test test/claude_mock/accounts_test.exs:42
 ```
 
